@@ -50,10 +50,32 @@ function GeneratePage() {
     setError(null);
 
     try {
-      // AI generation will go here
-      console.log("Generating story with prompt:", finalPrompt);
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
+      const { data, error: fnError } = await supabase.functions.invoke(
+        "generate-story",
+        {
+          body: { prompt: finalPrompt },
+        },
+      );
+
+      if (fnError) throw fnError;
+
+      const { data: story, error: dbError } = await supabase
+        .from("stories")
+        .insert({
+          user_id: session.user.id,
+          title: data.title,
+          prompt: finalPrompt,
+          sections: data.sections,
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      navigate({ to: "/story/$id", params: { id: story.id } });
+    } catch (err: any) {
+      console.error("Full error:", err);
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
