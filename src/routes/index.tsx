@@ -1,13 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "../lib/supabase";
+import { useEffect } from "react";
+import { useSession } from "../hooks/useSession";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
 function LandingPage() {
+  const { session } = useSession();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (session) {
+      navigate({ to: "/stories" });
+    }
+  }, [session]);
+
   return (
     <div className="max-w-md mx-auto">
       <div className="mb-8 text-center">
