@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useSession } from "../hooks/useSession";
 import type { Story } from "../types";
 
 export const Route = createFileRoute("/story/$id")({
@@ -10,9 +11,12 @@ export const Route = createFileRoute("/story/$id")({
 function StoryPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { session } = useSession();
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -32,6 +36,39 @@ function StoryPage() {
 
     fetchStory();
   }, [id]);
+
+  useEffect(() => {
+    const checkSaved = async () => {
+      if (!session) return;
+      const { data } = await supabase
+        .from("saved_stories")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .eq("story_id", id)
+        .single();
+      if (data) setSaved(true);
+    };
+    checkSaved();
+  }, [session, id]);
+
+  const handleSave = async () => {
+    if (!session) return navigate({ to: "/" });
+    setSaving(true);
+    if (saved) {
+      await supabase
+        .from("saved_stories")
+        .delete()
+        .eq("user_id", session.user.id)
+        .eq("story_id", id);
+      setSaved(false);
+    } else {
+      await supabase
+        .from("saved_stories")
+        .insert({ user_id: session.user.id, story_id: id });
+      setSaved(true);
+    }
+    setSaving(false);
+  };
 
   if (loading) {
     return (
@@ -82,6 +119,19 @@ function StoryPage() {
         >
           Generate another
         </button>
+        {session && (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className={`rounded-xl px-6 py-3 text-sm font-semibold border transition-colors disabled:opacity-50 ${
+              saved
+                ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500/10"
+                : "border-zinc-700 text-zinc-300 hover:border-zinc-500"
+            }`}
+          >
+            {saving ? "..." : saved ? "✓ Saved" : "Save to Library"}
+          </button>
+        )}
       </div>
     </div>
   );
