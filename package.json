@@ -14,7 +14,8 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/vite": "^4.1.18",
-    "@tanstack/react-router": "^1.168.22",
+    "@tanstack/react-router": "^1.168.23",
+    "@tanstack/router-plugin": "^1.167.22",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwindcss": "^4.1.18"
