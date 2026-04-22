@@ -17,6 +17,8 @@ function StoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [narrating, setNarrating] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -86,6 +88,26 @@ function StoryPage() {
     );
   }
 
+  const handleNarrate = async () => {
+    setNarrating(true);
+    try {
+      const fullText = story.sections.map((s) => s.text).join(" ");
+      const { data, error } = await supabase.functions.invoke("narrate-story", {
+        body: { text: fullText, voiceId: "n1PvBOwxb8X6m7tahp2h" },
+      });
+      if (error) throw error;
+      const binary = atob(data.audio);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const blob = new Blob([bytes], { type: "audio/mpeg" });
+      setAudioUrl(URL.createObjectURL(blob));
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setNarrating(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
       <button
@@ -119,6 +141,18 @@ function StoryPage() {
         >
           Generate another
         </button>
+
+        <button
+          onClick={handleNarrate}
+          disabled={narrating}
+          className="rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-300 hover:border-zinc-500 disabled:opacity-50 transition-colors"
+        >
+          {narrating ? "Generating narration..." : "🔊 Narrate Story"}
+        </button>
+
+        {audioUrl && (
+          <audio controls src={audioUrl} className="w-full mt-6" autoPlay />
+        )}
         {session && (
           <button
             onClick={handleSave}
