@@ -93,7 +93,7 @@ function StoryPage() {
     try {
       const fullText = story.sections.map((s) => s.text).join(" ");
       const { data, error } = await supabase.functions.invoke("narrate-story", {
-        body: { text: fullText, voiceId: "n1PvBOwxb8X6m7tahp2h" },
+        body: { text: fullText, voiceId: "JBFqnCBsd6RMkjVDRZzb" },
       });
       if (error) throw error;
       const binary = atob(data.audio);
@@ -133,38 +133,40 @@ function StoryPage() {
           </p>
         ))}
       </div>
+      <div className="mt-12 space-y-4">
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={() => navigate({ to: "/generate" })}
+            className="rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition-colors"
+          >
+            Generate another
+          </button>
 
-      <div className="mt-12 flex gap-3">
-        <button
-          onClick={() => navigate({ to: "/generate" })}
-          className="rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition-colors"
-        >
-          Generate another
-        </button>
+          <button
+            onClick={handleNarrate}
+            disabled={narrating}
+            className="rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-300 hover:border-zinc-500 disabled:opacity-50 transition-colors"
+          >
+            {narrating ? "Generating narration..." : "🔊 Narrate Story"}
+          </button>
 
-        <button
-          onClick={handleNarrate}
-          disabled={narrating}
-          className="rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-300 hover:border-zinc-500 disabled:opacity-50 transition-colors"
-        >
-          {narrating ? "Generating narration..." : "🔊 Narrate Story"}
-        </button>
+          {session && (
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className={`rounded-xl px-6 py-3 text-sm font-semibold border transition-colors disabled:opacity-50 ${
+                saved
+                  ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500/10"
+                  : "border-zinc-700 text-zinc-300 hover:border-zinc-500"
+              }`}
+            >
+              {saving ? "..." : saved ? "✓ Saved" : "Save to Library"}
+            </button>
+          )}
+        </div>
 
         {audioUrl && (
-          <audio controls src={audioUrl} className="w-full mt-6" autoPlay />
-        )}
-        {session && (
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className={`rounded-xl px-6 py-3 text-sm font-semibold border transition-colors disabled:opacity-50 ${
-              saved
-                ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500/10"
-                : "border-zinc-700 text-zinc-300 hover:border-zinc-500"
-            }`}
-          >
-            {saving ? "..." : saved ? "✓ Saved" : "Save to Library"}
-          </button>
+          <audio controls src={audioUrl} className="w-full" autoPlay />
         )}
       </div>
     </div>
