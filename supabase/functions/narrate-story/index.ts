@@ -7,7 +7,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-
   try {
     const { text, voiceId } = await req.json();
 
@@ -20,7 +19,7 @@ Deno.serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text,
+          text: text.slice(0, 2500),
           model_id: "eleven_multilingual_v2",
           voice_settings: {
             stability: 0.5,
@@ -36,7 +35,13 @@ Deno.serve(async (req) => {
     }
 
     const audioBuffer = await response.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
+    const bytes = new Uint8Array(audioBuffer);
+    let binary = "";
+    const chunkSize = 8192;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    const base64 = btoa(binary);
 
     return new Response(JSON.stringify({ audio: base64 }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

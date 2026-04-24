@@ -47,7 +47,7 @@ function StoryPage() {
         .select("id")
         .eq("user_id", session.user.id)
         .eq("story_id", id)
-        .single();
+        .maybeSingle();
       if (data) setSaved(true);
     };
     checkSaved();
