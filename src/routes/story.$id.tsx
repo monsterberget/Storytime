@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useSession } from "../hooks/useSession";
 import type { Story } from "../types";
+import BookSpinner from "../components/BookSpinner";
 
 export const Route = createFileRoute("/story/$id")({
   component: StoryPage,
@@ -147,7 +148,7 @@ function StoryPage() {
             disabled={narrating}
             className="rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-300 hover:border-zinc-500 disabled:opacity-50 transition-colors"
           >
-            {narrating ? "Generating narration..." : "🔊 Narrate Story"}
+            {narrating ? "🔊 Generating narration..." : "🔊 Narrate Story"}
           </button>
 
           {session && (
@@ -164,8 +165,13 @@ function StoryPage() {
             </button>
           )}
         </div>
+        {narrating && (
+          <div className="mt-6">
+            <BookSpinner message="Narrating your story..." />
+          </div>
+        )}
 
-        {audioUrl && (
+        {audioUrl && !narrating && (
           <audio controls src={audioUrl} className="w-full" autoPlay />
         )}
       </div>

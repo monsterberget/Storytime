@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSession } from "../hooks/useSession";
 import { supabase } from "../lib/supabase";
 import { useEffect } from "react";
+import BookSpinner from "../components/BookSpinner";
 
 export const Route = createFileRoute("/generate")({
   component: GeneratePage,
@@ -35,6 +36,7 @@ function GeneratePage() {
   }, [session, sessionLoading]);
 
   if (sessionLoading) return null;
+  if (loading) return <BookSpinner message="Writing your story..." />;
   if (!session) return null;
 
   const handleGenerate = async () => {
