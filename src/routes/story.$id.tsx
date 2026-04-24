@@ -182,6 +182,15 @@ function StoryPage() {
       setGeneratingImages(false);
     }
   };
+  const handleDelete = async () => {
+    if (!session || story.user_id !== session.user.id) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this story?",
+    );
+    if (!confirmed) return;
+    await supabase.from("stories").delete().eq("id", id);
+    navigate({ to: "/stories" });
+  };
 
   const handleNarrate = async () => {
     setNarrating(true);
@@ -307,6 +316,14 @@ function StoryPage() {
           >
             {narrating ? "🔊 Generating narration..." : "🔊 Narrate Story"}
           </button>
+          {session && story.user_id === session.user.id && (
+            <button
+              onClick={handleDelete}
+              className="rounded-xl border border-red-800 px-6 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
+            >
+              🗑 Delete Story
+            </button>
+          )}
 
           {session && (
             <button
