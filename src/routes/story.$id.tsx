@@ -23,6 +23,12 @@ function StoryPage() {
   const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
   const [upvotes, setUpvotes] = useState(0);
   const [downvotes, setDownvotes] = useState(0);
+  const [voiceProfiles, setVoiceProfiles] = useState<
+    { id: string; name: string; voice_id: string }[]
+  >([]);
+  const [selectedVoice, setSelectedVoice] = useState<string>(
+    "JBFqnCBsd6RMkjVDRZzb",
+  );
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -82,6 +88,21 @@ function StoryPage() {
     fetchRatings();
   }, [session, id]);
 
+  useEffect(() => {
+    const fetchVoiceProfiles = async () => {
+      if (!session) return;
+      const { data } = await supabase
+        .from("voice_profiles")
+        .select("id, name, voice_id")
+        .eq("user_id", session.user.id);
+      if (data && data.length > 0) {
+        setVoiceProfiles(data);
+        setSelectedVoice(data[0].voice_id);
+      }
+    };
+    fetchVoiceProfiles();
+  }, [session]);
+
   const handleSave = async () => {
     if (!session) return navigate({ to: "/" });
     setSaving(true);
@@ -122,7 +143,7 @@ function StoryPage() {
     try {
       const fullText = story.sections.map((s) => s.text).join(" ");
       const { data, error } = await supabase.functions.invoke("narrate-story", {
-        body: { text: fullText, voiceId: "JBFqnCBsd6RMkjVDRZzb" },
+        body: { text: fullText, voiceId: selectedVoice },
       });
       if (error) throw error;
       const binary = atob(data.audio);
@@ -202,6 +223,20 @@ function StoryPage() {
             Generate another
           </button>
 
+          {session && voiceProfiles.length > 0 && (
+            <select
+              value={selectedVoice}
+              onChange={(e) => setSelectedVoice(e.target.value)}
+              className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="JBFqnCBsd6RMkjVDRZzb">George (Default)</option>
+              {voiceProfiles.map((v) => (
+                <option key={v.id} value={v.voice_id}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+          )}
           <button
             onClick={handleNarrate}
             disabled={narrating}
