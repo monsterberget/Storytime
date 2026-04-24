@@ -17,7 +17,7 @@ function StoriesPage() {
       const { data, error } = await supabase
         .from("stories")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("upvotes", { ascending: false });
 
       if (!error && data) setStories(data);
       setLoading(false);
@@ -73,13 +73,19 @@ function StoriesPage() {
               <p className="text-zinc-400 text-sm line-clamp-3">
                 {story.sections[0]?.text}
               </p>
-              <p className="text-zinc-600 text-xs mt-3">
-                {new Date(story.created_at).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-zinc-600 text-xs">
+                  {new Date(story.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                  <span>👍 {story.upvotes}</span>
+                  <span>👎 {story.downvotes}</span>
+                </div>
+              </div>
             </button>
           ))}
         </div>

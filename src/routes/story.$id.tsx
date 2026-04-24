@@ -20,6 +20,9 @@ function StoryPage() {
   const [saving, setSaving] = useState(false);
   const [narrating, setNarrating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
+  const [upvotes, setUpvotes] = useState(0);
+  const [downvotes, setDownvotes] = useState(0);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -52,6 +55,31 @@ function StoryPage() {
       if (data) setSaved(true);
     };
     checkSaved();
+  }, [session, id]);
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (!id) return;
+
+      const { data: ratingData } = await supabase
+        .from("ratings")
+        .select("vote")
+        .eq("story_id", id);
+
+      if (ratingData) {
+        setUpvotes(ratingData.filter((r) => r.vote === "up").length);
+        setDownvotes(ratingData.filter((r) => r.vote === "down").length);
+      }
+
+      if (!session) return;
+      const { data: userRating } = await supabase
+        .from("ratings")
+        .select("vote")
+        .eq("user_id", session.user.id)
+        .eq("story_id", id)
+        .maybeSingle();
+      if (userRating) setUserVote(userRating.vote as "up" | "down");
+    };
+    fetchRatings();
   }, [session, id]);
 
   const handleSave = async () => {
@@ -106,6 +134,37 @@ function StoryPage() {
       console.error(err);
     } finally {
       setNarrating(false);
+    }
+  };
+  const handleVote = async (vote: "up" | "down") => {
+    if (!session) return navigate({ to: "/" });
+
+    const isRemoving = userVote === vote;
+
+    if (isRemoving) {
+      await supabase
+        .from("ratings")
+        .delete()
+        .eq("user_id", session.user.id)
+        .eq("story_id", id);
+      setUserVote(null);
+      if (vote === "up") setUpvotes((v) => v - 1);
+      else setDownvotes((v) => v - 1);
+    } else {
+      const previousVote = userVote;
+      await supabase
+        .from("ratings")
+        .upsert(
+          { user_id: session.user.id, story_id: id, vote },
+          { onConflict: "user_id,story_id" },
+        );
+      setUserVote(vote);
+      if (previousVote) {
+        if (previousVote === "up") setUpvotes((v) => v - 1);
+        else setDownvotes((v) => v - 1);
+      }
+      if (vote === "up") setUpvotes((v) => v + 1);
+      else setDownvotes((v) => v + 1);
     }
   };
 
@@ -163,6 +222,23 @@ function StoryPage() {
             >
               {saving ? "..." : saved ? "✓ Saved" : "Save to Library"}
             </button>
+          )}
+          {session && (
+            <div className="flex items-center gap-2 rounded-xl border border-zinc-700 px-4 py-3">
+              <button
+                onClick={() => handleVote("up")}
+                className={`text-sm font-semibold transition-colors ${userVote === "up" ? "text-emerald-400" : "text-zinc-400 hover:text-emerald-400"}`}
+              >
+                👍 {upvotes}
+              </button>
+              <div className="w-px h-4 bg-zinc-700" />
+              <button
+                onClick={() => handleVote("down")}
+                className={`text-sm font-semibold transition-colors ${userVote === "down" ? "text-red-400" : "text-zinc-400 hover:text-red-400"}`}
+              >
+                👎 {downvotes}
+              </button>
+            </div>
           )}
         </div>
         {narrating && (
