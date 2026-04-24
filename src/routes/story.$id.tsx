@@ -23,6 +23,8 @@ function StoryPage() {
   const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
   const [upvotes, setUpvotes] = useState(0);
   const [downvotes, setDownvotes] = useState(0);
+  const [images, setImages] = useState<string[]>([]);
+  const [generatingImages, setGeneratingImages] = useState(false);
   const [voiceProfiles, setVoiceProfiles] = useState<
     { id: string; name: string; voice_id: string }[]
   >([]);
@@ -42,6 +44,10 @@ function StoryPage() {
         setError("Story not found.");
       } else {
         setStory(data);
+        const savedImages = data.sections
+          .map((s: any) => s.image_url)
+          .filter(Boolean) as string[];
+        if (savedImages.length > 0) setImages(savedImages);
       }
       setLoading(false);
     };
@@ -138,6 +144,45 @@ function StoryPage() {
     );
   }
 
+  const handleGenerateImages = async () => {
+    setGeneratingImages(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "generate-images",
+        {
+          body: { title: story.title, sections: story.sections, storyId: id },
+        },
+      );
+      if (error) throw error;
+
+      console.log("Image URLs:", data.imageUrls);
+      setImages(data.imageUrls);
+
+      const updatedSections = story.sections.map((section, index) => ({
+        ...section,
+        image_url: data.imageUrls[index],
+      }));
+      console.log("Session user ID:", session?.user.id);
+      console.log("Story ID:", id);
+      console.log("Updated sections:", updatedSections);
+
+      const { error: dbError } = await supabase
+        .from("stories")
+        .update({ sections: updatedSections })
+        .eq("id", id);
+
+      console.log("DB update error:", dbError);
+
+      if (dbError) throw dbError;
+
+      setStory({ ...story, sections: updatedSections });
+    } catch (err: any) {
+      console.error("Full error:", err);
+    } finally {
+      setGeneratingImages(false);
+    }
+  };
+
   const handleNarrate = async () => {
     setNarrating(true);
     try {
@@ -209,9 +254,18 @@ function StoryPage() {
 
       <div className="space-y-8">
         {story.sections.map((section, index) => (
-          <p key={index} className="text-zinc-200 text-lg leading-relaxed">
-            {section.text}
-          </p>
+          <div key={index} className="space-y-4">
+            {images[index] && (
+              <img
+                src={images[index]}
+                alt={`Illustration for section ${index + 1}`}
+                className="w-full rounded-2xl"
+              />
+            )}
+            <p className="text-zinc-200 text-lg leading-relaxed">
+              {section.text}
+            </p>
+          </div>
         ))}
       </div>
       <div className="mt-12 space-y-4">
@@ -237,6 +291,15 @@ function StoryPage() {
               ))}
             </select>
           )}
+          <button
+            onClick={handleGenerateImages}
+            disabled={generatingImages}
+            className="rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-300 hover:border-zinc-500 disabled:opacity-50 transition-colors"
+          >
+            {generatingImages
+              ? "🎨 Generating images..."
+              : "🎨 Illustrate Story"}
+          </button>
           <button
             onClick={handleNarrate}
             disabled={narrating}
