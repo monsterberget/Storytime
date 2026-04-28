@@ -5,8 +5,7 @@ export interface Story {
   prompt: string;
   sections: StorySection[];
   created_at: string;
-  upvotes: number;
-  downvotes: number;
+  likes: number;
   audio_url?: string;
 }
 

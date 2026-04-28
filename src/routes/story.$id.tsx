@@ -20,18 +20,17 @@ function StoryPage() {
   const [saving, setSaving] = useState(false);
   const [narrating, setNarrating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
-  const [upvotes, setUpvotes] = useState(0);
-  const [downvotes, setDownvotes] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
   const [images, setImages] = useState<string[]>([]);
   const [generatingImages, setGeneratingImages] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [voiceProfiles, setVoiceProfiles] = useState<
     { id: string; name: string; voice_id: string }[]
   >([]);
   const [selectedVoice, setSelectedVoice] = useState<string>(
     "JBFqnCBsd6RMkjVDRZzb",
   );
-  const [autoNarrated, setAutoNarrated] = useState(false);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -71,29 +70,24 @@ function StoryPage() {
     checkSaved();
   }, [session, id]);
   useEffect(() => {
-    const fetchRatings = async () => {
+    const fetchLikes = async () => {
       if (!id) return;
-
-      const { data: ratingData } = await supabase
-        .from("ratings")
-        .select("vote")
+      const { count } = await supabase
+        .from("likes")
+        .select("*", { count: "exact", head: true })
         .eq("story_id", id);
-
-      if (ratingData) {
-        setUpvotes(ratingData.filter((r) => r.vote === "up").length);
-        setDownvotes(ratingData.filter((r) => r.vote === "down").length);
-      }
+      setLikes(count || 0);
 
       if (!session) return;
-      const { data: userRating } = await supabase
-        .from("ratings")
-        .select("vote")
+      const { data } = await supabase
+        .from("likes")
+        .select("id")
         .eq("user_id", session.user.id)
         .eq("story_id", id)
         .maybeSingle();
-      if (userRating) setUserVote(userRating.vote as "up" | "down");
+      if (data) setLiked(true);
     };
-    fetchRatings();
+    fetchLikes();
   }, [session, id]);
 
   useEffect(() => {
@@ -110,12 +104,6 @@ function StoryPage() {
     };
     fetchVoiceProfiles();
   }, [session]);
-  useEffect(() => {
-    if (story && !autoNarrated && !audioUrl && !narrating) {
-      setAutoNarrated(true);
-      handleNarrate();
-    }
-  }, [story, voiceProfiles]);
 
   const handleSave = async () => {
     if (!session) return navigate({ to: "/" });
@@ -219,40 +207,44 @@ function StoryPage() {
       setNarrating(false);
     }
   };
-  const handleVote = async (vote: "up" | "down") => {
+  const handleLike = async () => {
     if (!session) return navigate({ to: "/" });
-
-    const isRemoving = userVote === vote;
-
-    if (isRemoving) {
+    if (liked) {
       await supabase
-        .from("ratings")
+        .from("likes")
         .delete()
         .eq("user_id", session.user.id)
         .eq("story_id", id);
-      setUserVote(null);
-      if (vote === "up") setUpvotes((v) => v - 1);
-      else setDownvotes((v) => v - 1);
+      setLiked(false);
+      setLikes((l) => l - 1);
     } else {
-      const previousVote = userVote;
       await supabase
-        .from("ratings")
-        .upsert(
-          { user_id: session.user.id, story_id: id, vote },
-          { onConflict: "user_id,story_id" },
-        );
-      setUserVote(vote);
-      if (previousVote) {
-        if (previousVote === "up") setUpvotes((v) => v - 1);
-        else setDownvotes((v) => v - 1);
+        .from("likes")
+        .insert({ user_id: session.user.id, story_id: id });
+      setLiked(true);
+      setLikes((l) => l + 1);
+    }
+  };
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: story.title,
+          text: `Check out this story: ${story.title}`,
+          url,
+        });
+      } catch (err) {
+        // User cancelled
       }
-      if (vote === "up") setUpvotes((v) => v + 1);
-      else setDownvotes((v) => v + 1);
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("Link copied to clipboard!");
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <button
         onClick={() => navigate({ to: "/stories" })}
         className="text-zinc-400 hover:text-zinc-100 text-sm mb-8 flex items-center gap-2"
@@ -260,119 +252,135 @@ function StoryPage() {
         ← Back to stories
       </button>
 
-      <h1 className="text-4xl font-bold tracking-tight mb-2">{story.title}</h1>
-      <p className="text-zinc-500 text-sm mb-10">
-        {new Date(story.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-      </p>
+      <div className="flex gap-6 items-start">
+        {/* Story content */}
+        <div className="flex-1 min-w-0">
+          <h1 className="text-4xl font-bold tracking-tight mb-2">
+            {story.title}
+          </h1>
+          <p className="text-zinc-500 text-sm mb-10">
+            {new Date(story.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
 
-      <div className="space-y-8">
-        {story.sections.map((section, index) => (
-          <div key={index} className="space-y-4">
-            {images[index] && (
-              <img
-                src={images[index]}
-                alt={`Illustration for section ${index + 1}`}
-                className="w-full rounded-2xl"
-              />
-            )}
-            <p className="text-zinc-200 text-lg leading-relaxed">
-              {section.text}
-            </p>
+          <div className="space-y-8">
+            {story.sections.map((section, index) => (
+              <div key={index} className="space-y-4">
+                {images[index] && (
+                  <img
+                    src={images[index]}
+                    alt={`Illustration for section ${index + 1}`}
+                    className="w-full rounded-2xl"
+                  />
+                )}
+                <p className="text-zinc-200 text-lg leading-relaxed">
+                  {section.text}
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="mt-12 space-y-4">
-        <div className="flex gap-3 flex-wrap">
+        </div>
+
+        {/* Vertical Console */}
+        <div className="sticky top-6 w-36 bg-zinc-900 border border-zinc-800 rounded-2xl p-3.5 flex flex-col gap-2.5 flex-shrink-0">
+          {audioUrl && (
+            <audio
+              src={audioUrl}
+              id="story-audio"
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+              className="hidden"
+            />
+          )}
+
+          {/* Play/Pause */}
           <button
-            onClick={() => navigate({ to: "/generate" })}
-            className="rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition-colors"
+            onClick={() => {
+              const audio = document.getElementById(
+                "story-audio",
+              ) as HTMLAudioElement;
+              if (!audio) return;
+              if (audio.paused) audio.play();
+              else audio.pause();
+            }}
+            disabled={!audioUrl}
+            className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
           >
-            Generate another
+            {isPlaying ? "⏸ Pause" : "▶ Play"}
           </button>
 
-          {session && voiceProfiles.length > 0 && (
+          {/* Voice picker */}
+          {voiceProfiles.length > 0 && (
             <select
               value={selectedVoice}
               onChange={(e) => setSelectedVoice(e.target.value)}
-              className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-xs bg-zinc-800 border-none text-zinc-100 rounded-xl px-2.5 py-2.5 focus:outline-none cursor-pointer"
             >
-              <option value="JBFqnCBsd6RMkjVDRZzb">George (Default)</option>
+              <option value="JBFqnCBsd6RMkjVDRZzb">🎙 George</option>
               {voiceProfiles.map((v) => (
                 <option key={v.id} value={v.voice_id}>
-                  {v.name}
+                  🎙 {v.name}
                 </option>
               ))}
             </select>
           )}
-          <button
-            onClick={handleGenerateImages}
-            disabled={generatingImages}
-            className="rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-300 hover:border-zinc-500 disabled:opacity-50 transition-colors"
-          >
-            {generatingImages
-              ? "🎨 Generating images..."
-              : "🎨 Illustrate Story"}
-          </button>
-          <button
-            onClick={handleNarrate}
-            disabled={narrating}
-            className="rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-300 hover:border-zinc-500 disabled:opacity-50 transition-colors"
-          >
-            {narrating ? "🔊 Generating narration..." : "🔊 Narrate Story"}
-          </button>
-          {session && story.user_id === session.user.id && (
+
+          <div className="h-px bg-zinc-800 my-1" />
+
+          {/* Like */}
+          {session && (
             <button
-              onClick={handleDelete}
-              className="rounded-xl border border-red-800 px-6 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
+              onClick={handleLike}
+              className="bg-zinc-800 hover:bg-zinc-700 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm font-semibold transition-colors"
             >
-              🗑 Delete Story
+              <span>{liked ? "❤️" : "🤍"}</span>
+              <span className="text-zinc-300">{likes}</span>
             </button>
           )}
 
+          {/* Save */}
           {session && (
             <button
               onClick={handleSave}
               disabled={saving}
-              className={`rounded-xl px-6 py-3 text-sm font-semibold border transition-colors disabled:opacity-50 ${
-                saved
-                  ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500/10"
-                  : "border-zinc-700 text-zinc-300 hover:border-zinc-500"
-              }`}
+              className={`border px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors ${saved ? "border-emerald-500/50 text-emerald-400" : "border-zinc-700 text-zinc-300 hover:border-zinc-500"}`}
             >
-              {saving ? "..." : saved ? "✓ Saved" : "Save to Library"}
+              🔖 {saved ? "Saved" : "Save"}
             </button>
           )}
-          {session && (
-            <div className="flex items-center gap-2 rounded-xl border border-zinc-700 px-4 py-3">
-              <button
-                onClick={() => handleVote("up")}
-                className={`text-sm font-semibold transition-colors ${userVote === "up" ? "text-emerald-400" : "text-zinc-400 hover:text-emerald-400"}`}
-              >
-                👍 {upvotes}
-              </button>
-              <div className="w-px h-4 bg-zinc-700" />
-              <button
-                onClick={() => handleVote("down")}
-                className={`text-sm font-semibold transition-colors ${userVote === "down" ? "text-red-400" : "text-zinc-400 hover:text-red-400"}`}
-              >
-                👎 {downvotes}
-              </button>
-            </div>
+
+          {/* Share */}
+          <button
+            onClick={handleShare}
+            className="border border-zinc-700 text-zinc-300 hover:border-zinc-500 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
+          >
+            🔗 Share
+          </button>
+
+          <div className="h-px bg-zinc-800 my-1" />
+
+          {/* New Story */}
+          <button
+            onClick={() => navigate({ to: "/generate" })}
+            className="border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm font-semibold transition-colors"
+          >
+            + New
+          </button>
+
+          {/* Delete */}
+          {session && story.user_id === session.user.id && (
+            <button
+              onClick={handleDelete}
+              className="border border-red-900 text-red-400 hover:bg-red-500/10 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
+            >
+              - Delete
+            </button>
           )}
         </div>
-        {narrating && (
-          <div className="mt-6">
-            <BookSpinner message="Narrating your story..." />
-          </div>
-        )}
-
-        {audioUrl && !narrating && (
-          <audio controls src={audioUrl} className="w-full" />
-        )}
       </div>
     </div>
   );

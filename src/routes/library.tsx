@@ -104,9 +104,8 @@ function LibraryPage() {
                       year: "numeric",
                     })}
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-zinc-500">
-                    <span>👍 {story.upvotes}</span>
-                    <span>👎 {story.downvotes}</span>
+                  <div className="flex items-center gap-1 text-xs text-zinc-500">
+                    <span>❤️ {story.likes}</span>
                   </div>
                 </div>
               </div>
