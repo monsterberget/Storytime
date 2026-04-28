@@ -126,13 +126,12 @@ function SettingsPage() {
       {/* Record new voice */}
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">Record a New Voice</h2>
-        <p className="text-zinc-400 text-sm mb-4">
-          Record at least 30 seconds of clear speech for best results. Read a
-          story, sing a song, or just talk naturally.
-        </p>
         <p className="text-zinc-400 text-sm mb-2">
           Read the text below clearly and naturally. Try to match the warm,
           storytelling tone you'd use with a child.
+        </p>
+        <p className="text-zinc-400 text-sm mb-2">
+          Record at least 30 seconds of clear speech for best results.
         </p>
 
         <div className="rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-4 text-sm text-zinc-300 leading-relaxed mb-4 select-all">
