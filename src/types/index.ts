@@ -7,6 +7,7 @@ export interface Story {
   created_at: string;
   upvotes: number;
   downvotes: number;
+  audio_url?: string;
 }
 
 export interface StorySection {

@@ -1,3 +1,5 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -8,7 +10,7 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
   try {
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, storyId } = await req.json();
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -21,10 +23,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           text: text.slice(0, 2500),
           model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-          },
+          voice_settings: { stability: 0.5, similarity_boost: 0.75 },
         }),
       }
     );
@@ -35,6 +34,32 @@ Deno.serve(async (req) => {
     }
 
     const audioBuffer = await response.arrayBuffer();
+
+    if (storyId) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      const fileName = `${storyId}.mp3`;
+      const { error: uploadError } = await supabase.storage
+        .from("story-audio")
+        .upload(fileName, audioBuffer, {
+          contentType: "audio/mpeg",
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("story-audio")
+        .getPublicUrl(fileName);
+
+      return new Response(JSON.stringify({ audioUrl: publicUrl }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const bytes = new Uint8Array(audioBuffer);
     let binary = "";
     const chunkSize = 8192;

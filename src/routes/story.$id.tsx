@@ -31,6 +31,7 @@ function StoryPage() {
   const [selectedVoice, setSelectedVoice] = useState<string>(
     "JBFqnCBsd6RMkjVDRZzb",
   );
+  const [autoNarrated, setAutoNarrated] = useState(false);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -48,6 +49,7 @@ function StoryPage() {
           .map((s: any) => s.image_url)
           .filter(Boolean) as string[];
         if (savedImages.length > 0) setImages(savedImages);
+        if (data.audio_url) setAudioUrl(data.audio_url);
       }
       setLoading(false);
     };
@@ -108,6 +110,12 @@ function StoryPage() {
     };
     fetchVoiceProfiles();
   }, [session]);
+  useEffect(() => {
+    if (story && !autoNarrated && !audioUrl && !narrating) {
+      setAutoNarrated(true);
+      handleNarrate();
+    }
+  }, [story, voiceProfiles]);
 
   const handleSave = async () => {
     if (!session) return navigate({ to: "/" });
@@ -363,7 +371,7 @@ function StoryPage() {
         )}
 
         {audioUrl && !narrating && (
-          <audio controls src={audioUrl} className="w-full" autoPlay />
+          <audio controls src={audioUrl} className="w-full" />
         )}
       </div>
     </div>
