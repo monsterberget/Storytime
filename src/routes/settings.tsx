@@ -26,6 +26,8 @@ function SettingsPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   useEffect(() => {
     if (!sessionLoading && !session) navigate({ to: "/" });
@@ -107,6 +109,19 @@ function SettingsPage() {
     } finally {
       setSaving(false);
     }
+  };
+  const handleStartEdit = (voice: VoiceProfile) => {
+    setEditingId(voice.id);
+    setEditName(voice.name);
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    await supabase
+      .from("voice_profiles")
+      .update({ name: editName })
+      .eq("id", id);
+    setEditingId(null);
+    fetchVoices();
   };
 
   const handleDeleteVoice = async (id: string) => {
@@ -212,26 +227,68 @@ function SettingsPage() {
             {voices.map((voice) => (
               <div
                 key={voice.id}
-                className="flex items-center justify-between rounded-xl border border-zinc-700 px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-zinc-700 px-4 py-3 gap-3"
               >
-                <div>
-                  <p className="text-sm font-medium text-zinc-100">
-                    {voice.name}
-                  </p>
-                  <p className="text-xs text-zinc-500">
-                    {new Date(voice.created_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
+                <div className="flex-1 min-w-0">
+                  {editingId === voice.id ? (
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      autoFocus
+                      className="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-zinc-100">
+                        {voice.name}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {new Date(voice.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )}
+                      </p>
+                    </>
+                  )}
                 </div>
-                <button
-                  onClick={() => handleDeleteVoice(voice.id)}
-                  className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2 shrink-0">
+                  {editingId === voice.id ? (
+                    <>
+                      <button
+                        onClick={() => handleSaveEdit(voice.id)}
+                        className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="text-xs text-zinc-400 hover:text-zinc-300 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleStartEdit(voice)}
+                        className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors border py-2 px-3 rounded-lg border-zinc-700"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteVoice(voice.id)}
+                        className="text-xs text-red-400 hover:text-red-300 transition-colors border py-2 px-3 rounded-lg border-red-700"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
