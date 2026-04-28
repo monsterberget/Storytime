@@ -58,11 +58,12 @@ Deno.serve(async (req) => {
 
       const fileName = `${theme.name.toLowerCase()}.png`;
       const { error: uploadError } = await supabase.storage
-        .from("theme-images")
-        .upload(fileName, imageBlob, {
-          contentType: "image/png",
-          upsert: true,
-        });
+      .from("theme-images")
+      .upload(fileName, imageBlob, {
+       contentType: "image/png",
+       upsert: true,
+       cacheControl: "31536000", // 1 year
+      });
 
       if (uploadError) {
         results.push({ theme: theme.name, error: uploadError.message });
