@@ -4,9 +4,10 @@ export interface Story {
   title: string;
   prompt: string;
   sections: StorySection[];
+  audio_url?: string;
+  audio_urls?: Record<string, string>;
   created_at: string;
   likes: number;
-  audio_url?: string;
 }
 
 export interface StorySection {

@@ -48,13 +48,18 @@ function StoryPage() {
           .map((s: any) => s.image_url)
           .filter(Boolean) as string[];
         if (savedImages.length > 0) setImages(savedImages);
-        if (data.audio_url) setAudioUrl(data.audio_url);
       }
       setLoading(false);
     };
 
     fetchStory();
   }, [id]);
+
+  useEffect(() => {
+    if (!story) return;
+    const cachedUrl = story.audio_urls?.[selectedVoice];
+    setAudioUrl(cachedUrl || null);
+  }, [story, selectedVoice]);
 
   useEffect(() => {
     const checkSaved = async () => {
@@ -189,18 +194,25 @@ function StoryPage() {
   };
 
   const handleNarrate = async () => {
+    if (!story) return;
     setNarrating(true);
     try {
       const fullText = story.sections.map((s) => s.text).join(" ");
       const { data, error } = await supabase.functions.invoke("narrate-story", {
-        body: { text: fullText, voiceId: selectedVoice },
+        body: { text: fullText, voiceId: selectedVoice, storyId: id },
       });
       if (error) throw error;
-      const binary = atob(data.audio);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      const blob = new Blob([bytes], { type: "audio/mpeg" });
-      setAudioUrl(URL.createObjectURL(blob));
+
+      const newAudioUrls = {
+        ...(story.audio_urls || {}),
+        [selectedVoice]: data.audioUrl,
+      };
+      await supabase
+        .from("stories")
+        .update({ audio_urls: newAudioUrls })
+        .eq("id", id);
+      setStory({ ...story, audio_urls: newAudioUrls });
+      setAudioUrl(data.audioUrl);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -286,32 +298,39 @@ function StoryPage() {
 
         {/* Vertical Console */}
         <div className="sticky top-6 w-36 bg-zinc-900 border border-zinc-800 rounded-2xl p-3.5 flex flex-col gap-2.5 flex-shrink-0">
-          {audioUrl && (
-            <audio
-              src={audioUrl}
-              id="story-audio"
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onEnded={() => setIsPlaying(false)}
-              className="hidden"
-            />
+          {audioUrl ? (
+            <>
+              <audio
+                src={audioUrl}
+                id="story-audio"
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+                className="hidden"
+              />
+              <button
+                onClick={() => {
+                  const audio = document.getElementById(
+                    "story-audio",
+                  ) as HTMLAudioElement;
+                  if (!audio) return;
+                  if (audio.paused) audio.play();
+                  else audio.pause();
+                }}
+                className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
+              >
+                {isPlaying ? "⏸ Pause" : "▶ Play"}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleNarrate}
+              disabled={narrating}
+              className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
+            >
+              {narrating ? "🔊 Generating..." : "🎙 Generate"}
+            </button>
           )}
-
-          {/* Play/Pause */}
-          <button
-            onClick={() => {
-              const audio = document.getElementById(
-                "story-audio",
-              ) as HTMLAudioElement;
-              if (!audio) return;
-              if (audio.paused) audio.play();
-              else audio.pause();
-            }}
-            disabled={!audioUrl}
-            className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
-          >
-            {isPlaying ? "⏸ Pause" : "▶ Play"}
-          </button>
 
           {/* Voice picker */}
           {voiceProfiles.length > 0 && (

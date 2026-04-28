@@ -124,7 +124,9 @@ function GeneratePage() {
       }
 
       if (narrateResult.status === "fulfilled" && !narrateResult.value.error) {
-        updates.audio_url = narrateResult.value.data.audioUrl;
+        updates.audio_urls = {
+          [selectedVoice]: narrateResult.value.data.audioUrl,
+        };
       }
 
       if (Object.keys(updates).length > 0) {

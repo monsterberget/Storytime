@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
 
-      const fileName = `${storyId}.mp3`;
+      const fileName = `${storyId}/${voiceId}.mp3`;
       const { error: uploadError } = await supabase.storage
         .from("story-audio")
         .upload(fileName, audioBuffer, {
@@ -55,11 +55,12 @@ Deno.serve(async (req) => {
         .from("story-audio")
         .getPublicUrl(fileName);
 
-      return new Response(JSON.stringify({ audioUrl: publicUrl }), {
+      return new Response(JSON.stringify({ audioUrl: publicUrl, voiceId }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // Legacy fallback
     const bytes = new Uint8Array(audioBuffer);
     let binary = "";
     const chunkSize = 8192;
