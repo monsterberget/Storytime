@@ -1,9 +1,10 @@
+import type { VoiceProfile } from "../types";
+import { DEFAULT_VOICE_ID } from "../constants";
 interface VoiceProfile {
   id: string;
   name: string;
   voice_id: string;
 }
-
 interface PromptInputProps {
   prompt: string;
   onPromptChange: (prompt: string) => void;
@@ -43,7 +44,7 @@ export default function PromptInput({
           onChange={(e) => onVoiceChange(e.target.value)}
           className="bg-zinc-800 text-zinc-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
         >
-          <option value="JBFqnCBsd6RMkjVDRZzb">🎙 George</option>
+          <option value={DEFAULT_VOICE_ID}>🎙 George</option>
           {voiceProfiles.map((v) => (
             <option key={v.id} value={v.voice_id}>
               🎙 {v.name}

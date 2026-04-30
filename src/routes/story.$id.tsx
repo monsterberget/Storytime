@@ -5,6 +5,8 @@ import { useSession } from "../hooks/useSession";
 import type { Story } from "../types";
 import BookSpinner from "../components/BookSpinner";
 import VerticalConsole from "../components/VerticalConsole";
+import { DEFAULT_VOICE_ID } from "../constants";
+import type { VoiceProfile } from "../types";
 
 export const Route = createFileRoute("/story/$id")({
   component: StoryPage,
@@ -25,12 +27,8 @@ function StoryPage() {
   const [likes, setLikes] = useState(0);
   const [images, setImages] = useState<string[]>([]);
   const [generatingImages, setGeneratingImages] = useState(false);
-  const [voiceProfiles, setVoiceProfiles] = useState<
-    { id: string; name: string; voice_id: string }[]
-  >([]);
-  const [selectedVoice, setSelectedVoice] = useState<string>(
-    "JBFqnCBsd6RMkjVDRZzb",
-  );
+  const [voiceProfiles, setVoiceProfiles] = useState<VoiceProfile[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<string>(DEFAULT_VOICE_ID);
 
   useEffect(() => {
     const fetchStory = async () => {

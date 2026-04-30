@@ -1,12 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-
-interface VoiceProfile {
-  id: string;
-  name: string;
-  voice_id: string;
-}
+import { VoiceProfile } from "../types";
+import { DEFAULT_VOICE_ID } from "../constants";
 
 interface VerticalConsoleProps {
   session: Session | null;
@@ -90,7 +86,7 @@ export default function VerticalConsole({
           onChange={(e) => onSelectVoice(e.target.value)}
           className="w-full text-xs bg-zinc-800 border-none text-zinc-100 rounded-xl px-2.5 py-2.5 focus:outline-none cursor-pointer"
         >
-          <option value="JBFqnCBsd6RMkjVDRZzb">🎙 George</option>
+          <option value={DEFAULT_VOICE_ID}>🎙 George</option>
           {voiceProfiles.map((v) => (
             <option key={v.id} value={v.voice_id}>
               🎙 {v.name}

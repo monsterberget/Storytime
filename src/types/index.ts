@@ -19,13 +19,14 @@ export interface VoiceProfile {
   id: string;
   user_id: string;
   name: string;
+  voice_id: string;
   audio_url: string;
   created_at: string;
 }
 
-export interface Rating {
+export interface Like {
   id: string;
   user_id: string;
   story_id: string;
-  vote: 'up' | 'down';
+  created_at: string;
 }

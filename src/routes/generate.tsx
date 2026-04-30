@@ -7,6 +7,8 @@ import BookSpinner from "../components/BookSpinner";
 import Button from "../components/Button";
 import ThemePicker from "../components/ThemePicker";
 import PromptInput from "../components/PromptInput";
+import { DEFAULT_VOICE_ID } from "../constants";
+import type { VoiceProfile } from "../types";
 
 export const Route = createFileRoute("/generate")({
   component: GeneratePage,
@@ -17,12 +19,8 @@ function GeneratePage() {
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [voiceProfiles, setVoiceProfiles] = useState<
-    { id: string; name: string; voice_id: string }[]
-  >([]);
-  const [selectedVoice, setSelectedVoice] = useState<string>(
-    "JBFqnCBsd6RMkjVDRZzb",
-  );
+  const [voiceProfiles, setVoiceProfiles] = useState<VoiceProfile[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<string>(DEFAULT_VOICE_ID);
 
   const { session, loading: sessionLoading } = useSession();
   const navigate = useNavigate();
