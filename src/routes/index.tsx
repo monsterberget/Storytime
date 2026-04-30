@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { useEffect, useState } from "react";
 import { useSession } from "../hooks/useSession";
 import Button from "../components/Button";
+import { Input } from "../components/Input";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -147,19 +148,19 @@ function LandingPage() {
               : "Sign up to start creating stories."}
           </p>
 
-          <input
+          <Input
             type="email"
             placeholder="you@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 px-4 py-3 rounded-xl text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-2.5"
+            className="mb-2.5"
           />
-          <input
+          <Input
             type="password"
-            placeholder="Password"
+            placeholder="Your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 px-4 py-3 rounded-xl text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-4"
+            className="mb-4"
           />
 
           {error && <p className="text-red-400 text-xs mb-4">{error}</p>}
@@ -167,7 +168,6 @@ function LandingPage() {
           <Button
             onClick={handleEmailAuth}
             disabled={loading}
-            variant="primary"
             className="w-full mb-4"
           >
             {loading
