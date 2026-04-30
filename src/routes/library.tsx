@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useSession } from "../hooks/useSession";
 import type { Story } from "../types";
+import Button from "../components/Button";
 
 export const Route = createFileRoute("/library")({
   component: LibraryPage,
@@ -28,14 +29,12 @@ function LibraryPage() {
         .select("story_id, stories(*)")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
-
       if (!error && data) {
         const saved = data.map((d: any) => d.stories).filter(Boolean);
         setStories(saved);
       }
       setLoading(false);
     };
-
     if (session) fetchSaved();
   }, [session]);
 
@@ -56,14 +55,10 @@ function LibraryPage() {
           </h1>
           <p className="text-zinc-400">Stories you've saved for later.</p>
         </div>
-        <button
-          onClick={() => navigate({ to: "/generate" })}
-          className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition-colors"
-        >
+        <Button onClick={() => navigate({ to: "/generate" })} size="sm">
           + Generate
-        </button>
+        </Button>
       </div>
-
       {stories.length === 0 ? (
         <p className="text-zinc-500">
           No saved stories yet. Browse stories and save your favorites!

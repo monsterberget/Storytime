@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Story } from "../types";
+import Button from "../components/Button";
+import { Input } from "../components/input";
 
 export const Route = createFileRoute("/stories")({
   component: StoriesPage,
@@ -52,22 +54,19 @@ function StoriesPage() {
             Browse stories created by the community.
           </p>
         </div>
-        <button
-          onClick={() => navigate({ to: "/generate" })}
-          className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition-colors"
-        >
+        <Button onClick={() => navigate({ to: "/generate" })} size="sm">
           + Generate
-        </button>
+        </Button>
       </div>
 
       {/* Search and filter */}
       <div className="flex gap-3 mb-6 flex-wrap">
-        <input
+        <Input
           type="text"
           placeholder="Search stories..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-48 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="flex-1 min-w-48"
         />
         <div className="flex rounded-xl border border-zinc-700 overflow-hidden">
           <button
