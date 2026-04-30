@@ -4,6 +4,7 @@ import { useSession } from "../hooks/useSession";
 import { supabase } from "../lib/supabase";
 import { useEffect } from "react";
 import BookSpinner from "../components/BookSpinner";
+import Button from "../components/Button";
 
 export const Route = createFileRoute("/generate")({
   component: GeneratePage,
@@ -248,13 +249,9 @@ function GeneratePage() {
         <p className="text-red-400 text-sm text-center mb-4">{error}</p>
       )}
 
-      <button
-        onClick={handleGenerate}
-        disabled={loading}
-        className="w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 px-6 py-3.5 rounded-xl font-semibold text-sm transition-colors"
-      >
+      <Button onClick={handleGenerate} disabled={loading} className="w-full">
         ✨ Create Story
-      </button>
+      </Button>
     </div>
   );
 }

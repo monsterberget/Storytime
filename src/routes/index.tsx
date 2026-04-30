@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "../lib/supabase";
 import { useEffect, useState } from "react";
 import { useSession } from "../hooks/useSession";
+import Button from "../components/Button";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -163,17 +164,18 @@ function LandingPage() {
 
           {error && <p className="text-red-400 text-xs mb-4">{error}</p>}
 
-          <button
+          <Button
             onClick={handleEmailAuth}
             disabled={loading}
-            className="w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 px-4 py-3 rounded-xl font-medium text-sm transition-colors mb-4"
+            variant="primary"
+            className="w-full mb-4"
           >
             {loading
               ? "Loading..."
               : mode === "signin"
                 ? "Sign in"
                 : "Create account"}
-          </button>
+          </Button>
 
           <p className="text-center text-zinc-500 text-sm">
             {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
