@@ -209,7 +209,7 @@ function StoryPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto pb-32 lg:pb-0">
       <button
         onClick={() => navigate({ to: "/stories" })}
         className="text-ink-muted hover:text-ink-primary text-sm mb-8 flex items-center gap-2"
@@ -217,7 +217,7 @@ function StoryPage() {
         ← Back to stories
       </button>
 
-      <div className="flex gap-6 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
         <div className="flex-1 min-w-0">
           <h1 className="text-4xl font-bold tracking-tight mb-2">
             {story.title}

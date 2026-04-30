@@ -45,7 +45,7 @@ export default function VerticalConsole({
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <div className="sticky top-6 w-36 bg-surface-raised border border-edge rounded-2xl p-3.5 flex flex-col gap-2.5 flex-shrink-0">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-surface-raised border-t border-edge p-3.5 flex flex-row flex-wrap gap-2 justify-center lg:static lg:sticky lg:top-6 lg:w-36 lg:border lg:rounded-2xl lg:flex-col lg:gap-2.5 lg:justify-start lg:flex-shrink-0">
       {audioUrl ? (
         <>
           <audio
@@ -65,7 +65,7 @@ export default function VerticalConsole({
               if (audio.paused) audio.play();
               else audio.pause();
             }}
-            className="bg-brand text-brand-dark hover:bg-brand-hover px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
+            className="bg-brand text-brand-dark hover:bg-brand-hover px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors min-w-24"
           >
             {isPlaying ? "⏸ Pause" : "▶ Play"}
           </button>
@@ -74,7 +74,7 @@ export default function VerticalConsole({
         <button
           onClick={onNarrate}
           disabled={narrating}
-          className="bg-brand text-brand-dark hover:bg-brand-hover disabled:opacity-50 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
+          className="bg-brand text-brand-dark hover:bg-brand-hover disabled:opacity-50 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors min-w-24"
         >
           {narrating ? "🔊 Generating..." : "🎙 Generate"}
         </button>
@@ -84,7 +84,7 @@ export default function VerticalConsole({
         <select
           value={selectedVoice}
           onChange={(e) => onSelectVoice(e.target.value)}
-          className="w-full text-xs bg-surface-hover border-none text-ink-primary rounded-xl px-2.5 py-2.5 focus:outline-none cursor-pointer"
+          className="text-xs bg-surface-hover border-none text-ink-primary rounded-xl px-2.5 py-2.5 focus:outline-none cursor-pointer lg:w-full"
         >
           <option value={DEFAULT_VOICE_ID}>🎙 George</option>
           {voiceProfiles.map((v) => (
@@ -95,7 +95,7 @@ export default function VerticalConsole({
         </select>
       )}
 
-      <div className="h-px bg-edge my-1" />
+      <div className="hidden lg:block h-px bg-edge my-1" />
 
       {session && (
         <button
@@ -124,7 +124,7 @@ export default function VerticalConsole({
         🔗 Share
       </button>
 
-      <div className="h-px bg-edge my-1" />
+      <div className="hidden lg:block h-px bg-edge my-1" />
 
       <button
         onClick={() => navigate({ to: "/generate" })}
