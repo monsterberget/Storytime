@@ -1,46 +1,4 @@
-const THEMES = [
-  {
-    name: "Dragons",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/dragons.png",
-  },
-  {
-    name: "Space",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/space.png",
-  },
-  {
-    name: "Friendship",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/friendship.png",
-  },
-  {
-    name: "Animals",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/animals.png",
-  },
-  {
-    name: "Magic",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/magic.png",
-  },
-  {
-    name: "Ocean",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/ocean.png",
-  },
-  {
-    name: "Dinosaurs",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/dinosaurs.png",
-  },
-  {
-    name: "Superheroes",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/superheroes.png",
-  },
-];
-
+import { THEMES } from "../constants";
 interface ThemePickerProps {
   selected: string | null;
   onSelect: (theme: string | null) => void;
