@@ -21,7 +21,7 @@ export default function Card({
   return (
     <div
       {...props}
-      className={`rounded-2xl border border-zinc-800 bg-zinc-900/60 ${paddingStyles[padding]} ${className}`}
+      className={`rounded-2xl border border-edge bg-surface-elevated ${paddingStyles[padding]} ${className}`}
     >
       {children}
     </div>

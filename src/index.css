@@ -1,30 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand colors */
+  /* Brand */
   --color-brand: #10b981;
   --color-brand-hover: #34d399;
+  --color-brand-strong: #059669;
   --color-brand-dark: #052e16;
-  --color-brand-muted: rgba(16, 185, 129, 0.1);
+  --color-brand-muted: rgb(16 185 129 / 0.1);
+  --color-brand-border: rgb(16 185 129 / 0.5);
 
-  /* Background layers */
-  --color-bg-primary: #09090b;
-  --color-bg-surface: #18181b;
-  --color-bg-surface-hover: #27272a;
-  --color-bg-elevated: rgba(24, 24, 27, 0.6);
+  /* Surface (backgrounds) */
+  --color-surface: #09090b;
+  --color-surface-raised: #18181b;
+  --color-surface-hover: #27272a;
+  --color-surface-elevated: rgb(24 24 27 / 0.6);
 
-  /* Borders */
-  --color-border-default: #27272a;
-  --color-border-muted: #18181b;
-  --color-border-emphasis: #3f3f46;
+  /* Border */
+  --color-edge: #27272a;
+  --color-edge-strong: #3f3f46;
 
   /* Text */
-  --color-text-primary: #fafafa;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
-  --color-text-faded: #52525b;
+  --color-ink-primary: #fafafa;
+  --color-ink-secondary: #d4d4d8;
+  --color-ink-muted: #a1a1aa;
+  --color-ink-faded: #71717a;
+  --color-ink-disabled: #52525b;
 
   /* Status */
   --color-danger: #f87171;
+  --color-danger-strong: #ef4444;
   --color-danger-bg: #7f1d1d;
 }

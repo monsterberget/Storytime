@@ -4,7 +4,7 @@ type InputProps = InputHTMLAttributes<HTMLInputElement>;
 type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 const baseStyles =
-  "w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500";
+  "w-full rounded-xl border border-edge-strong bg-surface-raised px-4 py-3 text-sm text-ink-primary placeholder-ink-disabled focus:outline-none focus:ring-2 focus:ring-brand";
 
 export function Input({ className = "", ...props }: InputProps) {
   return <input {...props} className={`${baseStyles} ${className}`} />;
