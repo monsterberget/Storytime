@@ -2,6 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useSession } from "../hooks/useSession";
+import Card from "../components/Card";
+import { Input } from "../components/Input";
+import Button from "../components/Button";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -139,7 +142,7 @@ function SettingsPage() {
       </p>
 
       {/* Record new voice */}
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 mb-6">
+      <Card padding="lg" className="mb-6">
         <h2 className="text-lg font-semibold mb-4">Record a New Voice</h2>
         <p className="text-zinc-400 text-sm mb-2">
           Read the text below clearly and naturally. Try to match the warm,
@@ -166,12 +169,11 @@ function SettingsPage() {
         </div>
 
         <div className="space-y-4">
-          <input
+          <Input
             type="text"
             placeholder="Voice name (e.g. Dad's Voice)"
             value={voiceName}
             onChange={(e) => setVoiceName(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
 
           <div className="flex gap-3">
@@ -213,10 +215,10 @@ function SettingsPage() {
             </button>
           )}
         </div>
-      </section>
+      </Card>
 
       {/* Existing voices */}
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">
+      <Card padding="lg">
         <h2 className="text-lg font-semibold mb-4">Your Voice Profiles</h2>
         {voices.length === 0 ? (
           <p className="text-zinc-500 text-sm">
@@ -293,7 +295,7 @@ function SettingsPage() {
             ))}
           </div>
         )}
-      </section>
+      </Card>
     </div>
   );
 }
