@@ -34,11 +34,7 @@ function SettingsPage() {
 
   useEffect(() => {
     if (!sessionLoading && !session) navigate({ to: "/" });
-  }, [session, sessionLoading]);
-
-  useEffect(() => {
-    if (session) fetchVoices();
-  }, [session]);
+  }, [session, sessionLoading, navigate]);
 
   const fetchVoices = async () => {
     const { data } = await supabase
@@ -46,8 +42,23 @@ function SettingsPage() {
       .select("*")
       .eq("user_id", session!.user.id)
       .order("created_at", { ascending: false });
-    if (data) setVoices(data);
+    if (data) setVoices(data as VoiceProfile[]);
   };
+
+  useEffect(() => {
+    if (!session) return;
+
+    const loadVoices = async () => {
+      const { data } = await supabase
+        .from("voice_profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+      if (data) setVoices(data as VoiceProfile[]);
+    };
+
+    loadVoices();
+  }, [session]);
 
   const startRecording = async () => {
     setAudioBlob(null);
@@ -87,9 +98,7 @@ function SettingsPage() {
 
       const { data, error: fnError } = await supabase.functions.invoke(
         "clone-voice",
-        {
-          body: formData,
-        },
+        { body: formData },
       );
 
       if (fnError) throw fnError;
@@ -107,12 +116,13 @@ function SettingsPage() {
       setVoiceName("");
       setAudioBlob(null);
       fetchVoices();
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setSaving(false);
     }
   };
+
   const handleStartEdit = (voice: VoiceProfile) => {
     setEditingId(voice.id);
     setEditName(voice.name);
@@ -137,22 +147,21 @@ function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold tracking-tight mb-2">Settings</h1>
-      <p className="text-zinc-400 mb-8">
+      <p className="text-ink-muted mb-8">
         Manage your voice profiles for AI narration.
       </p>
 
-      {/* Record new voice */}
       <Card padding="lg" className="mb-6">
         <h2 className="text-lg font-semibold mb-4">Record a New Voice</h2>
-        <p className="text-zinc-400 text-sm mb-2">
+        <p className="text-ink-muted text-sm mb-2">
           Read the text below clearly and naturally. Try to match the warm,
           storytelling tone you'd use with a child.
         </p>
-        <p className="text-zinc-400 text-sm mb-2">
+        <p className="text-ink-muted text-sm mb-2">
           Record at least 30 seconds of clear speech for best results.
         </p>
 
-        <div className="rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-4 text-sm text-zinc-300 leading-relaxed mb-4 select-all">
+        <div className="rounded-xl border border-edge-strong bg-surface px-4 py-4 text-sm text-ink-secondary leading-relaxed mb-4 select-all">
           Once upon a time, in a forest full of tall, whispering trees, there
           lived a small fox named Finn. Finn loved three things more than
           anything else in the world: the smell of rain on dry leaves, the sound
@@ -180,14 +189,14 @@ function SettingsPage() {
             {!recording ? (
               <button
                 onClick={startRecording}
-                className="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-400 transition-colors"
+                className="rounded-xl bg-danger-strong px-5 py-2.5 text-sm font-semibold text-white hover:bg-danger transition-colors"
               >
                 🎙 Start Recording
               </button>
             ) : (
               <button
                 onClick={stopRecording}
-                className="rounded-xl bg-zinc-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-zinc-600 transition-colors animate-pulse"
+                className="rounded-xl bg-surface-hover px-5 py-2.5 text-sm font-semibold text-white hover:bg-edge-strong transition-colors animate-pulse"
               >
                 ⏹ Stop Recording
               </button>
@@ -202,26 +211,25 @@ function SettingsPage() {
             )}
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          {success && <p className="text-emerald-400 text-sm">{success}</p>}
+          {error && <p className="text-danger text-sm">{error}</p>}
+          {success && <p className="text-brand text-sm">{success}</p>}
 
           {audioBlob && (
-            <button
+            <Button
               onClick={handleSaveVoice}
               disabled={saving}
-              className="w-full rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+              className="w-full"
             >
               {saving ? "Cloning voice..." : "Save Voice Profile"}
-            </button>
+            </Button>
           )}
         </div>
       </Card>
 
-      {/* Existing voices */}
       <Card padding="lg">
         <h2 className="text-lg font-semibold mb-4">Your Voice Profiles</h2>
         {voices.length === 0 ? (
-          <p className="text-zinc-500 text-sm">
+          <p className="text-ink-faded text-sm">
             No voice profiles yet. Record your voice above!
           </p>
         ) : (
@@ -229,7 +237,7 @@ function SettingsPage() {
             {voices.map((voice) => (
               <div
                 key={voice.id}
-                className="flex items-center justify-between rounded-xl border border-zinc-700 px-4 py-3 gap-3"
+                className="flex items-center justify-between rounded-xl border border-edge-strong px-4 py-3 gap-3"
               >
                 <div className="flex-1 min-w-0">
                   {editingId === voice.id ? (
@@ -238,14 +246,14 @@ function SettingsPage() {
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       autoFocus
-                      className="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full rounded-lg border border-edge-strong bg-surface-raised px-3 py-1.5 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand"
                     />
                   ) : (
                     <>
-                      <p className="text-sm font-medium text-zinc-100">
+                      <p className="text-sm font-medium text-ink-primary">
                         {voice.name}
                       </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-ink-faded">
                         {new Date(voice.created_at).toLocaleDateString(
                           "en-US",
                           {
@@ -263,13 +271,13 @@ function SettingsPage() {
                     <>
                       <button
                         onClick={() => handleSaveEdit(voice.id)}
-                        className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+                        className="text-xs text-brand hover:text-brand-hover transition-colors"
                       >
                         Save
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="text-xs text-zinc-400 hover:text-zinc-300 transition-colors"
+                        className="text-xs text-ink-muted hover:text-ink-secondary transition-colors"
                       >
                         Cancel
                       </button>
@@ -278,13 +286,13 @@ function SettingsPage() {
                     <>
                       <button
                         onClick={() => handleStartEdit(voice)}
-                        className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors border py-2 px-3 rounded-lg border-zinc-700"
+                        className="text-xs text-ink-muted hover:text-ink-primary transition-colors border py-2 px-3 rounded-lg border-edge-strong"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteVoice(voice.id)}
-                        className="text-xs text-red-400 hover:text-red-300 transition-colors border py-2 px-3 rounded-lg border-red-700"
+                        className="text-xs text-danger hover:text-danger-strong transition-colors border py-2 px-3 rounded-lg border-danger-bg"
                       >
                         Delete
                       </button>
