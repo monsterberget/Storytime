@@ -5,53 +5,12 @@ import { supabase } from "../lib/supabase";
 import { useEffect } from "react";
 import BookSpinner from "../components/BookSpinner";
 import Button from "../components/Button";
+import ThemePicker from "../components/ThemePicker";
+import PromptInput from "../components/PromptInput";
 
 export const Route = createFileRoute("/generate")({
   component: GeneratePage,
 });
-
-const THEMES = [
-  {
-    name: "Dragons",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/dragons.png",
-  },
-  {
-    name: "Space",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/space.png",
-  },
-  {
-    name: "Friendship",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/friendship.png",
-  },
-  {
-    name: "Animals",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/animals.png",
-  },
-  {
-    name: "Magic",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/magic.png",
-  },
-  {
-    name: "Ocean",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/ocean.png",
-  },
-  {
-    name: "Dinosaurs",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/dinosaurs.png",
-  },
-  {
-    name: "Superheroes",
-    image:
-      "https://fbbjurouxohpzyyypfwx.supabase.co/storage/v1/object/public/theme-images/superheroes.png",
-  },
-];
 
 function GeneratePage() {
   const [prompt, setPrompt] = useState("");
@@ -179,70 +138,27 @@ function GeneratePage() {
         </p>
       </div>
 
-      <div
-        className={`bg-zinc-900 border rounded-2xl p-5 mb-6 transition-all ${prompt ? "border-emerald-500 ring-4 ring-emerald-500/10" : "border-zinc-800"}`}
-      >
-        <textarea
-          value={prompt}
-          onChange={(e) => {
-            setPrompt(e.target.value);
+      <div className="mb-6">
+        <PromptInput
+          prompt={prompt}
+          onPromptChange={(value) => {
+            setPrompt(value);
             setSelectedTheme(null);
           }}
-          placeholder="A brave little fox who wants to visit the moon..."
-          rows={3}
-          className="w-full bg-transparent text-zinc-100 text-lg resize-none focus:outline-none placeholder-zinc-600"
+          selectedVoice={selectedVoice}
+          onVoiceChange={setSelectedVoice}
+          voiceProfiles={voiceProfiles}
         />
-        <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-800">
-          <span className="text-xs text-zinc-600">
-            Be as detailed or simple as you like
-          </span>
-          <select
-            value={selectedVoice}
-            onChange={(e) => setSelectedVoice(e.target.value)}
-            className="bg-zinc-800 text-zinc-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
-          >
-            <option value="JBFqnCBsd6RMkjVDRZzb">🎙 George</option>
-            {voiceProfiles.map((v) => (
-              <option key={v.id} value={v.voice_id}>
-                🎙 {v.name}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
-        {THEMES.map((theme) => (
-          <button
-            key={theme.name}
-            onClick={() => {
-              setSelectedTheme(
-                selectedTheme === theme.name ? null : theme.name,
-              );
-              setPrompt("");
-            }}
-            className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${
-              selectedTheme === theme.name
-                ? "border-emerald-500 ring-4 ring-emerald-500/20"
-                : "border-transparent hover:border-zinc-600"
-            }`}
-          >
-            <img
-              src={theme.image}
-              alt={theme.name}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <span className="absolute bottom-2.5 left-0 right-0 text-white text-sm font-semibold">
-              {theme.name}
-            </span>
-            {selectedTheme === theme.name && (
-              <span className="absolute top-2 right-2 bg-emerald-500 text-zinc-950 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                ✓
-              </span>
-            )}
-          </button>
-        ))}
+      <div className="mb-6">
+        <ThemePicker
+          selected={selectedTheme}
+          onSelect={(theme) => {
+            setSelectedTheme(theme);
+            if (theme) setPrompt("");
+          }}
+        />
       </div>
 
       {error && (
