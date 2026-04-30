@@ -1,18 +1,22 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "../hooks/useSession";
 import { supabase } from "../lib/supabase";
-import { useEffect } from "react";
 import BookSpinner from "../components/BookSpinner";
 import Button from "../components/Button";
-import ThemePicker from "../components/ThemePicker";
 import PromptInput from "../components/PromptInput";
+import ThemePicker from "../components/ThemePicker";
+import type { VoiceProfile, StorySection } from "../types";
 import { DEFAULT_VOICE_ID } from "../constants";
-import type { VoiceProfile } from "../types";
 
 export const Route = createFileRoute("/generate")({
   component: GeneratePage,
 });
+
+interface StoryUpdates {
+  sections?: StorySection[];
+  audio_urls?: Record<string, string>;
+}
 
 function GeneratePage() {
   const [prompt, setPrompt] = useState("");
@@ -33,7 +37,7 @@ function GeneratePage() {
         .select("id, name, voice_id")
         .eq("user_id", session.user.id);
       if (data && data.length > 0) {
-        setVoiceProfiles(data);
+        setVoiceProfiles(data as VoiceProfile[]);
         setSelectedVoice(data[0].voice_id);
       }
     };
@@ -42,7 +46,7 @@ function GeneratePage() {
 
   useEffect(() => {
     if (!sessionLoading && !session) navigate({ to: "/" });
-  }, [session, sessionLoading]);
+  }, [session, sessionLoading, navigate]);
 
   if (sessionLoading) return null;
   if (loading)
@@ -82,7 +86,8 @@ function GeneratePage() {
         .single();
       if (dbError) throw dbError;
 
-      const fullText = storyData.sections.map((s: any) => s.text).join(" ");
+      const sections = storyData.sections as StorySection[];
+      const fullText = sections.map((s) => s.text).join(" ");
 
       const [imageResult, narrateResult] = await Promise.allSettled([
         supabase.functions.invoke("generate-images", {
@@ -97,15 +102,13 @@ function GeneratePage() {
         }),
       ]);
 
-      const updates: any = {};
+      const updates: StoryUpdates = {};
       if (imageResult.status === "fulfilled" && !imageResult.value.error) {
-        const imageUrls = imageResult.value.data.imageUrls;
-        updates.sections = storyData.sections.map(
-          (section: any, index: number) => ({
-            ...section,
-            image_url: imageUrls[index],
-          }),
-        );
+        const imageUrls = imageResult.value.data.imageUrls as string[];
+        updates.sections = sections.map((section, index) => ({
+          ...section,
+          image_url: imageUrls[index],
+        }));
       }
       if (narrateResult.status === "fulfilled" && !narrateResult.value.error) {
         updates.audio_urls = {
@@ -117,9 +120,13 @@ function GeneratePage() {
       }
 
       navigate({ to: "/story/$id", params: { id: story.id } });
-    } catch (err: any) {
+    } catch (err) {
       console.error("Full error:", err);
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -128,10 +135,10 @@ function GeneratePage() {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-semibold tracking-tight text-zinc-100 mb-2">
+        <h1 className="text-4xl font-semibold tracking-tight text-ink-primary mb-2">
           Tell me a story about...
         </h1>
-        <p className="text-zinc-500 text-sm">
+        <p className="text-ink-faded text-sm">
           Describe an idea or pick a theme below.
         </p>
       </div>
@@ -159,9 +166,7 @@ function GeneratePage() {
         />
       </div>
 
-      {error && (
-        <p className="text-red-400 text-sm text-center mb-4">{error}</p>
-      )}
+      {error && <p className="text-danger text-sm text-center mb-4">{error}</p>}
 
       <Button onClick={handleGenerate} disabled={loading} className="w-full">
         ✨ Create Story
