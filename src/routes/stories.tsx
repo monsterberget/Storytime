@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Story } from "../types";
 import Button from "../components/Button";
-import { Input } from "../components/input";
+import { Input } from "../components/Input";
 import StoryCard from "../components/StoryCard";
 
 export const Route = createFileRoute("/stories")({
@@ -25,7 +25,7 @@ function StoriesPage() {
         .select("*")
         .order(filter === "top" ? "likes" : "created_at", { ascending: false });
 
-      if (!error && data) setStories(data);
+      if (!error && data) setStories(data as Story[]);
       setLoading(false);
     };
 
@@ -41,7 +41,7 @@ function StoriesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-zinc-400">Loading stories...</p>
+        <p className="text-ink-muted">Loading stories...</p>
       </div>
     );
   }
@@ -51,7 +51,7 @@ function StoriesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-1">Stories</h1>
-          <p className="text-zinc-400">
+          <p className="text-ink-muted">
             Browse stories created by the community.
           </p>
         </div>
@@ -60,7 +60,6 @@ function StoriesPage() {
         </Button>
       </div>
 
-      {/* Search and filter */}
       <div className="flex gap-3 mb-6 flex-wrap">
         <Input
           type="text"
@@ -69,16 +68,16 @@ function StoriesPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 min-w-48"
         />
-        <div className="flex rounded-xl border border-zinc-700 overflow-hidden">
+        <div className="flex rounded-xl border border-edge-strong overflow-hidden">
           <button
             onClick={() => setFilter("latest")}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors ${filter === "latest" ? "bg-zinc-700 text-zinc-100" : "text-zinc-400 hover:text-zinc-100"}`}
+            className={`px-4 py-2.5 text-sm font-medium transition-colors ${filter === "latest" ? "bg-edge-strong text-ink-primary" : "text-ink-muted hover:text-ink-primary"}`}
           >
             Latest
           </button>
           <button
             onClick={() => setFilter("top")}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors ${filter === "top" ? "bg-zinc-700 text-zinc-100" : "text-zinc-400 hover:text-zinc-100"}`}
+            className={`px-4 py-2.5 text-sm font-medium transition-colors ${filter === "top" ? "bg-edge-strong text-ink-primary" : "text-ink-muted hover:text-ink-primary"}`}
           >
             Top
           </button>
@@ -86,7 +85,7 @@ function StoriesPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-zinc-500">No stories found.</p>
+        <p className="text-ink-faded">No stories found.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((story) => (

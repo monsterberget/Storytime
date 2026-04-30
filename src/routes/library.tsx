@@ -20,7 +20,7 @@ function LibraryPage() {
     if (!sessionLoading && !session) {
       navigate({ to: "/" });
     }
-  }, [session, sessionLoading]);
+  }, [session, sessionLoading, navigate]);
 
   useEffect(() => {
     const fetchSaved = async () => {
@@ -31,7 +31,9 @@ function LibraryPage() {
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
       if (!error && data) {
-        const saved = data.map((d: any) => d.stories).filter(Boolean);
+        const saved = (data as unknown as { stories: Story | null }[])
+          .map((d) => d.stories)
+          .filter(Boolean) as Story[];
         setStories(saved);
       }
       setLoading(false);
@@ -42,7 +44,7 @@ function LibraryPage() {
   if (sessionLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-zinc-400">Loading...</p>
+        <p className="text-ink-muted">Loading...</p>
       </div>
     );
   }
@@ -54,14 +56,14 @@ function LibraryPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-1">
             Your Library
           </h1>
-          <p className="text-zinc-400">Stories you've saved for later.</p>
+          <p className="text-ink-muted">Stories you've saved for later.</p>
         </div>
         <Button onClick={() => navigate({ to: "/generate" })} size="sm">
           + Generate
         </Button>
       </div>
       {stories.length === 0 ? (
-        <p className="text-zinc-500">
+        <p className="text-ink-faded">
           No saved stories yet. Browse stories and save your favorites!
         </p>
       ) : (
