@@ -4,8 +4,8 @@ export default function BookSpinner({
   message?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
-      <svg width="160" height="160" viewBox="0 0 680 680" role="img">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8">
+      <svg width="320" height="320" viewBox="0 0 680 680" role="img">
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           @keyframes starPop { 0%,100% { opacity:0; transform:scale(0.2); } 50% { opacity:1; transform:scale(1); } }
@@ -229,13 +229,9 @@ export default function BookSpinner({
             fill="#f59e0b"
           />
         </g>
-
-        <circle className="dot1" cx="300" cy="500" r="8" fill="#8b5cf6" />
-        <circle className="dot2" cx="340" cy="500" r="8" fill="#f59e0b" />
-        <circle className="dot3" cx="380" cy="500" r="8" fill="#ec4899" />
       </svg>
 
-      <p className="text-zinc-400 text-sm animate-pulse">{message}</p>
+      <p className="text-ink-muted text-lg animate-pulse">{message}</p>
     </div>
   );
 }

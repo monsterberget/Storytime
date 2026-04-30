@@ -53,10 +53,10 @@ export default function ThemePicker({ selected, onSelect }: ThemePickerProps) {
         <button
           key={theme.name}
           onClick={() => onSelect(selected === theme.name ? null : theme.name)}
-          className={`relative aspect-4/3 rounded-xl overflow-hidden border-2 transition-all ${
+          className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${
             selected === theme.name
-              ? "border-emerald-500 ring-4 ring-emerald-500/20"
-              : "border-transparent hover:border-zinc-600"
+              ? "border-brand ring-4 ring-brand/20"
+              : "border-transparent hover:border-ink-muted"
           }`}
         >
           <img
@@ -64,12 +64,12 @@ export default function ThemePicker({ selected, onSelect }: ThemePickerProps) {
             alt={theme.name}
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
           <span className="absolute bottom-2.5 left-0 right-0 text-white text-sm font-semibold">
             {theme.name}
           </span>
           {selected === theme.name && (
-            <span className="absolute top-2 right-2 bg-emerald-500 text-zinc-950 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+            <span className="absolute top-2 right-2 bg-brand text-brand-dark rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
               ✓
             </span>
           )}

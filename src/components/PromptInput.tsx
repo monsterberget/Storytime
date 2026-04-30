@@ -1,10 +1,6 @@
 import type { VoiceProfile } from "../types";
 import { DEFAULT_VOICE_ID } from "../constants";
-interface VoiceProfile {
-  id: string;
-  name: string;
-  voice_id: string;
-}
+
 interface PromptInputProps {
   prompt: string;
   onPromptChange: (prompt: string) => void;
@@ -22,10 +18,8 @@ export default function PromptInput({
 }: PromptInputProps) {
   return (
     <div
-      className={`bg-zinc-900 border rounded-2xl p-5 transition-all ${
-        prompt
-          ? "border-emerald-500 ring-4 ring-emerald-500/10"
-          : "border-zinc-800"
+      className={`bg-surface-raised border rounded-2xl p-5 transition-all ${
+        prompt ? "border-brand ring-4 ring-brand/10" : "border-edge"
       }`}
     >
       <textarea
@@ -33,16 +27,16 @@ export default function PromptInput({
         onChange={(e) => onPromptChange(e.target.value)}
         placeholder="A brave little fox who wants to visit the moon..."
         rows={3}
-        className="w-full bg-transparent text-zinc-100 text-lg resize-none focus:outline-none placeholder-zinc-600"
+        className="w-full bg-transparent text-ink-primary text-lg resize-none focus:outline-none placeholder-ink-faded"
       />
-      <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-800">
-        <span className="text-xs text-zinc-600">
+      <div className="flex justify-between items-center mt-3 pt-3 border-t border-edge">
+        <span className="text-xs text-ink-disabled">
           Be as detailed or simple as you like
         </span>
         <select
           value={selectedVoice}
           onChange={(e) => onVoiceChange(e.target.value)}
-          className="bg-zinc-800 text-zinc-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
+          className="bg-surface-hover text-ink-secondary text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
         >
           <option value={DEFAULT_VOICE_ID}>🎙 George</option>
           {voiceProfiles.map((v) => (
