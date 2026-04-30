@@ -1,8 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { VoiceProfile } from "../types";
 import { DEFAULT_VOICE_ID } from "../constants";
+import type { VoiceProfile } from "../types";
 
 interface VerticalConsoleProps {
   session: Session | null;
@@ -45,7 +45,7 @@ export default function VerticalConsole({
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <div className="sticky top-6 w-36 bg-zinc-900 border border-zinc-800 rounded-2xl p-3.5 flex flex-col gap-2.5 flex-shrink-0">
+    <div className="sticky top-6 w-36 bg-surface-raised border border-edge rounded-2xl p-3.5 flex flex-col gap-2.5 flex-shrink-0">
       {audioUrl ? (
         <>
           <audio
@@ -65,7 +65,7 @@ export default function VerticalConsole({
               if (audio.paused) audio.play();
               else audio.pause();
             }}
-            className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
+            className="bg-brand text-brand-dark hover:bg-brand-hover px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
           >
             {isPlaying ? "⏸ Pause" : "▶ Play"}
           </button>
@@ -74,7 +74,7 @@ export default function VerticalConsole({
         <button
           onClick={onNarrate}
           disabled={narrating}
-          className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
+          className="bg-brand text-brand-dark hover:bg-brand-hover disabled:opacity-50 px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
         >
           {narrating ? "🔊 Generating..." : "🎙 Generate"}
         </button>
@@ -84,7 +84,7 @@ export default function VerticalConsole({
         <select
           value={selectedVoice}
           onChange={(e) => onSelectVoice(e.target.value)}
-          className="w-full text-xs bg-zinc-800 border-none text-zinc-100 rounded-xl px-2.5 py-2.5 focus:outline-none cursor-pointer"
+          className="w-full text-xs bg-surface-hover border-none text-ink-primary rounded-xl px-2.5 py-2.5 focus:outline-none cursor-pointer"
         >
           <option value={DEFAULT_VOICE_ID}>🎙 George</option>
           {voiceProfiles.map((v) => (
@@ -95,15 +95,15 @@ export default function VerticalConsole({
         </select>
       )}
 
-      <div className="h-px bg-zinc-800 my-1" />
+      <div className="h-px bg-edge my-1" />
 
       {session && (
         <button
           onClick={onLike}
-          className="bg-zinc-800 hover:bg-zinc-700 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm font-semibold transition-colors"
+          className="bg-surface-hover hover:bg-edge-strong px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm font-semibold transition-colors"
         >
           <span>{liked ? "❤️" : "🤍"}</span>
-          <span className="text-zinc-300">{likes}</span>
+          <span className="text-ink-secondary">{likes}</span>
         </button>
       )}
 
@@ -111,7 +111,7 @@ export default function VerticalConsole({
         <button
           onClick={onSave}
           disabled={saving}
-          className={`border px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors ${saved ? "border-emerald-500/50 text-emerald-400" : "border-zinc-700 text-zinc-300 hover:border-zinc-500"}`}
+          className={`border px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors ${saved ? "border-brand-border text-brand" : "border-edge-strong text-ink-secondary hover:border-ink-muted"}`}
         >
           🔖 {saved ? "Saved" : "Save"}
         </button>
@@ -119,16 +119,16 @@ export default function VerticalConsole({
 
       <button
         onClick={onShare}
-        className="border border-zinc-700 text-zinc-300 hover:border-zinc-500 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
+        className="border border-edge-strong text-ink-secondary hover:border-ink-muted px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
       >
         🔗 Share
       </button>
 
-      <div className="h-px bg-zinc-800 my-1" />
+      <div className="h-px bg-edge my-1" />
 
       <button
         onClick={() => navigate({ to: "/generate" })}
-        className="border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm font-semibold transition-colors"
+        className="border border-brand-border text-brand hover:bg-brand-muted px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm font-semibold transition-colors"
       >
         + New
       </button>
@@ -136,7 +136,7 @@ export default function VerticalConsole({
       {isOwner && (
         <button
           onClick={onDelete}
-          className="border border-red-900 text-red-400 hover:bg-red-500/10 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
+          className="border border-danger-bg text-danger hover:bg-danger/10 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
         >
           🗑 Delete
         </button>
