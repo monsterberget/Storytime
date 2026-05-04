@@ -146,6 +146,14 @@ function LandingPage() {
               {mode === "signin" ? "Create an account" : "Sign in"}
             </button>
           </p>
+          <div className="mt-4 pt-4 border-t border-edge text-center">
+            <button
+              onClick={() => navigate({ to: "/stories" })}
+              className="text-ink-muted hover:text-ink-primary text-sm"
+            >
+              Continue as guest →
+            </button>
+          </div>
         </div>
       </div>
     </div>
