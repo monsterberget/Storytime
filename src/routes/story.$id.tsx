@@ -214,7 +214,7 @@ function StoryPage() {
         onClick={() => navigate({ to: "/stories" })}
         className="text-ink-muted hover:text-ink-primary text-sm mb-8 flex items-center gap-2"
       >
-        ← Back to stories
+        <span aria-hidden="true">←</span> Back to stories
       </button>
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">

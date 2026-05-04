@@ -107,6 +107,7 @@ export default function VerticalConsole({
       {session && (
         <button
           onClick={onLike}
+          aria-label={liked ? "Unlike story" : "Like story"}
           className="bg-surface-hover hover:bg-edge-strong px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm font-semibold transition-colors"
         >
           <span>{liked ? "❤️" : "🤍"}</span>
@@ -118,6 +119,7 @@ export default function VerticalConsole({
         <button
           onClick={onSave}
           disabled={saving}
+          aria-label={saved ? "Remove from saved" : "Save story"}
           className={`border px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors ${saved ? "border-brand-border text-brand" : "border-edge-strong text-ink-secondary hover:border-ink-muted"}`}
         >
           🔖 {saved ? "Saved" : "Save"}
@@ -126,6 +128,7 @@ export default function VerticalConsole({
 
       <button
         onClick={onShare}
+        aria-label="Share story"
         className="border border-edge-strong text-ink-secondary hover:border-ink-muted px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
       >
         🔗 Share
@@ -143,6 +146,7 @@ export default function VerticalConsole({
       {isOwner && (
         <button
           onClick={onDelete}
+          aria-label="Delete story"
           className="border border-danger-bg text-danger hover:bg-danger/10 px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-sm transition-colors"
         >
           🗑 Delete
