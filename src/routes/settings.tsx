@@ -138,6 +138,8 @@ function SettingsPage() {
   };
 
   const handleDeleteVoice = async (id: string) => {
+    const confirmed = window.confirm("Delete this voice profile?");
+    if (!confirmed) return;
     await supabase.from("voice_profiles").delete().eq("id", id);
     fetchVoices();
   };

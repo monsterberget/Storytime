@@ -75,6 +75,7 @@ function RootLayout() {
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden text-ink-primary p-2"
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           <svg
             width="24"
