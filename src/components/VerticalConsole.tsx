@@ -70,7 +70,7 @@ export default function VerticalConsole({
             {isPlaying ? "⏸ Pause" : "▶ Play"}
           </button>
         </>
-      ) : (
+      ) : session ? (
         <button
           onClick={onNarrate}
           disabled={narrating}
@@ -78,9 +78,16 @@ export default function VerticalConsole({
         >
           {narrating ? "🔊 Generating..." : "🎙 Generate"}
         </button>
+      ) : (
+        <button
+          onClick={() => navigate({ to: "/" })}
+          className="bg-brand text-brand-dark hover:bg-brand-hover px-3 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-colors min-w-24"
+        >
+          Sign in
+        </button>
       )}
 
-      {voiceProfiles.length > 0 && (
+      {session && voiceProfiles.length > 0 && (
         <select
           value={selectedVoice}
           onChange={(e) => onSelectVoice(e.target.value)}
