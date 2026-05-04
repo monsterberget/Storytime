@@ -15,17 +15,41 @@ function StoriesPage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"latest" | "top">("latest");
+  const [filter, setFilter] = useState<
+    "latest" | "top" | "month" | "year" | "random"
+  >("latest");
 
   useEffect(() => {
     const fetchStories = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("stories")
-        .select("*")
-        .order(filter === "top" ? "likes" : "created_at", { ascending: false });
+      let query = supabase.from("stories").select("*");
 
-      if (!error && data) setStories(data as Story[]);
+      if (filter === "month") {
+        const monthAgo = new Date();
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        query = query
+          .gte("created_at", monthAgo.toISOString())
+          .order("likes", { ascending: false });
+      } else if (filter === "year") {
+        const yearAgo = new Date();
+        yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+        query = query
+          .gte("created_at", yearAgo.toISOString())
+          .order("likes", { ascending: false });
+      } else if (filter === "top") {
+        query = query.order("likes", { ascending: false });
+      } else {
+        query = query.order("created_at", { ascending: false });
+      }
+
+      const { data, error } = await query;
+      if (!error && data) {
+        let result = data as Story[];
+        if (filter === "random") {
+          result = [...result].sort(() => Math.random() - 0.5);
+        }
+        setStories(result);
+      }
       setLoading(false);
     };
 
@@ -68,20 +92,17 @@ function StoriesPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 min-w-48"
         />
-        <div className="flex rounded-xl border border-edge-strong overflow-hidden">
-          <button
-            onClick={() => setFilter("latest")}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors ${filter === "latest" ? "bg-edge-strong text-ink-primary" : "text-ink-muted hover:text-ink-primary"}`}
-          >
-            Latest
-          </button>
-          <button
-            onClick={() => setFilter("top")}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors ${filter === "top" ? "bg-edge-strong text-ink-primary" : "text-ink-muted hover:text-ink-primary"}`}
-          >
-            Top
-          </button>
-        </div>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value as typeof filter)}
+          className="rounded-xl border border-edge-strong bg-surface-raised px-4 py-2.5 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand cursor-pointer"
+        >
+          <option value="latest">Latest</option>
+          <option value="top">Most liked</option>
+          <option value="month">This month</option>
+          <option value="year">This year</option>
+          <option value="random">Random</option>
+        </select>
       </div>
 
       {filtered.length === 0 ? (
