@@ -59,7 +59,7 @@ function RootLayout() {
           {session ? (
             <button
               onClick={() => supabase.auth.signOut()}
-              className="text-ink-muted hover:text-ink-primary"
+              className="text-danger hover:text-ink-primary"
             >
               Sign out
             </button>
@@ -144,7 +144,7 @@ function RootLayout() {
                   supabase.auth.signOut();
                   closeMenu();
                 }}
-                className="text-left px-6 py-3 text-ink-secondary hover:bg-surface-hover"
+                className="text-left px-6 py-3 text-danger hover:bg-surface-hover"
               >
                 Sign out
               </button>
